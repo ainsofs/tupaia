@@ -109,6 +109,7 @@ const ExpandedContent = styled.div`
 export const Control = ({
   emptyMessage,
   selectedMeasure,
+  showDatePicker,
   defaultDates,
   datePickerLimits,
   isMeasureLoading,
@@ -162,7 +163,7 @@ export const Control = ({
           </IconWrapper>
         </Content>
       )}
-      {selectedMeasure.periodGranularity && (
+      {showDatePicker && (
         <MeasureDatePicker expanded={isExpanded}>
           <DateRangePicker
             granularity={selectedMeasure.periodGranularity}
@@ -193,6 +194,7 @@ Control.propTypes = {
     startDate: PropTypes.shape({}),
     endDate: PropTypes.shape({}),
   }),
+  showDatePicker: PropTypes.bool,
   defaultDates: PropTypes.shape({
     startDate: PropTypes.object,
     endDate: PropTypes.object,
@@ -210,6 +212,7 @@ Control.propTypes = {
 Control.defaultProps = {
   isMeasureLoading: false,
   selectedMeasure: {},
+  showDatePicker: false,
   datePickerLimits: {
     startDate: null,
     endDate: null,
