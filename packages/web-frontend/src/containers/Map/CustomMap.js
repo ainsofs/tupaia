@@ -4,12 +4,13 @@
  * This source code is licensed under the AGPL-3.0 license
  * found in the LICENSE file in the root directory of this source tree.
  */
-
+/* eslint-disable max-classes-per-file */
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { func, shape } from 'prop-types';
 
-import { LayerGroup, Pane } from 'react-leaflet';
-
+import { LayerGroup, Pane, MapLayer, Tooltip } from 'react-leaflet';
+import { layerGroup } from 'leaflet';
+import { labelEngine, addLabel } from './tooltipManager';
 import { LeafletMap } from './LeafletMap';
 
 import MarkerLayer from './MarkerLayer';
@@ -19,6 +20,20 @@ import { TileLayer } from './TileLayer';
 
 import { checkBoundsDifference, organisationUnitIsArea } from '../../utils';
 import ConnectedPolygon from './ConnectedPolygon';
+
+export default class TooltipCollision extends MapLayer {
+  getChildContext() {
+    return {
+      layerContainer: this.leafletElement,
+    };
+  }
+
+  createLeafletElement() {
+    const group = layerGroup.tooltipCollision({ margin: 5 });
+    this.layerContainer.addLayer(group);
+    return group;
+  }
+}
 
 const CHANGE_TO_PARENT_PERCENTAGE = 0.6;
 
@@ -137,6 +152,8 @@ export class CustomMap extends Component {
       position,
       shouldSnapToPosition,
     } = this.props;
+
+    addLabel(<Tooltip />, 1);
     return (
       <LeafletMap
         onClick={closeDropdownOverlays}

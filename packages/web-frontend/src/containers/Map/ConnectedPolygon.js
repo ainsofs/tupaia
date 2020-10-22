@@ -52,21 +52,25 @@ export const ShadedPolygon = styled(Polygon)`
  */
 class ConnectedPolygon extends Component {
   shouldComponentUpdate(nextProps) {
-    const { measureId, coordinates, orgUnitMeasureData, isHidden } = this.props;
+    const { zoom, measureId, coordinates, orgUnitMeasureData, isHidden } = this.props;
     if (nextProps.measureId !== measureId) return true;
     if (nextProps.coordinates !== coordinates) return true;
     if (nextProps.orgUnitMeasureData !== orgUnitMeasureData) return true;
     if (isHidden !== nextProps.isHidden) return true;
+    if (nextProps.zoom !== zoom) return true;
     return false;
   }
 
   getTooltip(name) {
-    const { isChildArea, hasMeasureData, orgUnitMeasureData, measureOptions } = this.props;
+    const { isChildArea, hasMeasureData, orgUnitMeasureData, measureOptions, zoom } = this.props;
     const hasMeasureValue = orgUnitMeasureData || orgUnitMeasureData === 0;
+    console.log(zoom);
 
     // don't render tooltips if we have a measure loaded
     // and don't have a value to display in the tooltip (ie: radius overlay)
-    if (hasMeasureData && !hasMeasureValue) return null;
+
+    // || (hasMeasureData && !hasMeasureValue)
+    if (Math.random() < 0.8) return null;
 
     const text = hasMeasureValue
       ? `${name}: ${getSingleFormattedValue(orgUnitMeasureData, measureOptions)}`
@@ -100,7 +104,7 @@ class ConnectedPolygon extends Component {
           hasChildren={hasChildren}
           hasShadedChildren={hasShadedChildren}
           coordinates={coordinates}
-          // Randomize key to ensure polygon appears at top. This is still imporatant even
+          // Randomize key to ensure polygon appears at top. This is still important even
           // though the polygon is in a LayerGroup due to issues with react-leaflet that
           // maintainer says are out of scope for the module.
           key={`currentOrgUnitPolygon${Math.random()}`}
@@ -173,6 +177,7 @@ ConnectedPolygon.defaultProps = {
 const mapStateToProps = (state, givenProps) => {
   const { organisationUnitCode } = givenProps.area;
   const { measureData, measureOptions } = state.map.measureInfo;
+  const { zoom } = state.map.position;
   const measureId = selectCurrentMeasureId(state);
   const organisationUnitChildren = selectOrgUnitChildren(state, organisationUnitCode);
 
@@ -211,6 +216,7 @@ const mapStateToProps = (state, givenProps) => {
     orgUnitMeasureData,
     shade,
     isHidden,
+    zoom,
     measureOptions,
     hasChildren: organisationUnitChildren && organisationUnitChildren.length > 0,
     hasMeasureData: measureData && measureData.length > 0,

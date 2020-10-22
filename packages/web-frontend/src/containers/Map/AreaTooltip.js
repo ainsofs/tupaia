@@ -70,3 +70,4 @@ AreaTooltip.defaultProps = {
   onMouseOver: undefined,
   onMouseOut: undefined,
 };
+
