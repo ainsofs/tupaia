@@ -39,6 +39,17 @@ const QUESTION_TYPE_LIST = Object.values(ANSWER_TYPES);
 const DEFAULT_SERVICE_TYPE = 'tupaia';
 const VIS_CRITERIA_CONJUNCTION = '_conjunction';
 
+const validateSurveyServiceType = async (models, surveyCode, serviceType) => {
+  const existingDataGroup = await models.dataSource.findOne({ code: surveyCode });
+  if (existingDataGroup !== null) {
+    if (serviceType !== existingDataGroup.service_type) {
+      throw new ImportValidationError(
+        `Data service must match. The existing survey has Data service: ${existingDataGroup.service_type}. Attempted to import with Data service: ${serviceType}.`,
+      );
+    }
+  }
+};
+
 const validateQuestionExistence = rows => {
   const isQuestionRow = ({ type }) => QUESTION_TYPE_LIST.includes(type);
   if (!rows || !rows.some(isQuestionRow)) {
@@ -53,12 +64,9 @@ const updateOrCreateDataGroup = async (models, { surveyCode, serviceType }) => {
       type: models.dataSource.getTypes().DATA_GROUP,
       code: surveyCode,
     },
-    { service_type: DEFAULT_SERVICE_TYPE },
+    { service_type: serviceType },
   );
 
-  if (serviceType && serviceType !== dataGroup.service_type) {
-    dataGroup.service_type = serviceType;
-  }
   dataGroup.sanitizeConfig();
   await dataGroup.save();
 
@@ -125,9 +133,14 @@ export async function importSurveys(req, res) {
         const [tabName, sheet] = surveySheets;
         const surveyName = extractTabNameFromQuery(tabName, requestedSurveyNames);
         const surveyCode = await findOrCreateSurveyCode(transactingModels, surveyName);
+
+        const { serviceType = DEFAULT_SERVICE_TYPE } = req.query;
+
+        await validateSurveyServiceType(transactingModels, surveyCode, serviceType);
+
         const dataGroup = await updateOrCreateDataGroup(transactingModels, {
           surveyCode,
-          serviceType: req.query.serviceType,
+          serviceType,
         });
 
         // Clear all existing data element/data group associations
