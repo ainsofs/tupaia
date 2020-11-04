@@ -27,7 +27,7 @@ describe('EntityModel', () => {
   const upsertNonOrgUnitEntity = async data =>
     upsertEntity({ ...data, type: NON_ORG_UNIT_ENTITY_TYPE });
 
-  describe('isOrganisationUnit()', () => {
+  describe('isOrganisationUnit', () => {
     ORG_UNIT_ENTITY_TYPES.forEach(type => {
       it(`should return true if its type is ${type}`, async () => {
         const entity = await upsertEntity({ type });
